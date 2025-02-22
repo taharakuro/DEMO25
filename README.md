@@ -286,13 +286,42 @@
     ![named первая часть](https://github.com/dizzamer/DEMO2025/blob/main/named1.png)
     ![named вторая часть](https://github.com/dizzamer/DEMO2025/blob/main/named2.png)  
     mkdir /var/named/master  
-    chown -R root:named /var/named/master  
-    touch /var/named/master/au.team    
+    cp /var/named/named.localhost /var/named/master/au-team.irpo
+    cp /var/named/named.loopback /var/named/master/0.168.192.zone
+    chown -R root:named /var/named/master
     chmod -R 750 /var/named/master  
     nano /var/named/master/au.team.irpo  
-    ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/au-team.irpo.png)  
-    nano /var/named/master/0.168.192.zone    
-    ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/0.168.192.zone.jpg) 
+    $TTL    1D
+    @       IN      SOA     au-team.irpo. root.au-team.irpo. (
+                                2024102200      ; serial
+                                12H             ; refresh
+                                1H              ; retry
+                                1W              ; expire
+                                1H              ; ncache
+                            )
+            IN      NS      au-team.irpo.
+            IN      A       192.168.0.2
+    hq-rtr  IN      A       192.168.0.1
+    br-rtr  IN      A       192.168.1.1
+    hq-srv  IN      A       192.168.0.2
+    hq-cli  IN      A       192.168.0.66
+    br-srv  IN      A       192.168.1.2
+    moodle  IN      CNAME   hq-rtr
+    wiki    IN      CNAME   hq-rtr
+    
+    nano /var/named/master/0.168.192.zone  
+    $TTL    1D
+    @       IN      SOA     au-team.irpo. root.au-team.irpo. (
+                                2024102200      ; serial
+                                12H             ; refresh
+                                1H              ; retry
+                                1W              ; expire
+                                1H              ; ncache
+                            )
+            IN      NS      au-team.irpo.
+    1       IN      PTR     hq-rtr.au-team.irpo.
+    2       IN      PTR     hq-srv.au-team.irpo.
+    66      IN      PTR     hq-cli.au-team.irpo. 
     systemctl enable --now named  
     Проверить зоны можно командой named-checkconf -z  
     ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/checkconf.png)  
