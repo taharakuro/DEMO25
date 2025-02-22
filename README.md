@@ -417,7 +417,7 @@
   dnf install bind -y
   nano /etc/named.conf
   ```
-  *(Смотрите изображения конфигурации: [named1.png](https://github.com/taharakuro/DEMO2025/blob/main/named1.png), [named2.png](https://github.com/taharakuro/DEMO2025/blob/main/named2.png))*
+  *(Смотрите изображения конфигурации: [named1.png](https://github.com/taharakuro/DEMO25/blob/main/named1.png), [named2.png](https://github.com/taharakuro/DEMO25/blob/main/named2.png))*
 
 - **Настройка зон:**
   - Создаём директорию и копируем шаблоны:
