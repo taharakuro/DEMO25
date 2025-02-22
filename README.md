@@ -290,10 +290,7 @@
     cp /var/named/named.loopback /var/named/master/0.168.192.zone
     chown -R root:named /var/named/master
     chmod -R 750 /var/named/master  
-    
-    ```
     nano /var/named/master/au.team.irpo 
-    ```
     
     ```
     $TTL    1D
@@ -315,9 +312,7 @@
     wiki    IN      CNAME   hq-rtr
     ```
     
-    ```
     nano /var/named/master/0.168.192.zone  
-    ```
     
     ```
     $TTL    1D
