@@ -290,9 +290,11 @@
     cp /var/named/named.loopback /var/named/master/0.168.192.zone
     chown -R root:named /var/named/master
     chmod -R 750 /var/named/master  
+    
     ```
     nano /var/named/master/au.team.irpo 
     ```
+    
     ```
     $TTL    1D
     @       IN      SOA     au-team.irpo. root.au-team.irpo. (
@@ -312,9 +314,11 @@
     moodle  IN      CNAME   hq-rtr
     wiki    IN      CNAME   hq-rtr
     ```
+    
     ```
     nano /var/named/master/0.168.192.zone  
     ```
+    
     ```
     $TTL    1D
     @       IN      SOA     au-team.irpo. root.au-team.irpo. (
@@ -329,6 +333,7 @@
     2       IN      PTR     hq-srv.au-team.irpo.
     66      IN      PTR     hq-cli.au-team.irpo. 
     ```
+   
     systemctl enable --now named  
     Проверить зоны можно командой named-checkconf -z  
     ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/checkconf.png)  
