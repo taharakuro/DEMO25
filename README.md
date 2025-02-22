@@ -281,27 +281,26 @@
   ● Сведения о настройке протокола занесите в отчёт  
 ## 10. Настройка DNS для офисов HQ и BR.  
   ● Основной DNS-сервер реализован на HQ-SRV.  
-    dnf install bind -y  
-    systemctl enable --now named   
-    nano /etc/named.conf  
-    ![named первая часть](https://github.com/dizzamer/DEMO2025/blob/main/dns.png)  
-    ![named вторая часть](https://github.com/dizzamer/DEMO2025/blob/main/dns2.png)  
+    dnf install bind -y     
+    nano /etc/named.conf
+    ![named первая часть](https://github.com/dizzamer/DEMO2025/blob/main/named1.png)
+    ![named вторая часть](https://github.com/dizzamer/DEMO2025/blob/main/named2.png)  
     mkdir /var/named/master  
     chown -R root:named /var/named/master  
     touch /var/named/master/au.team    
     chmod -R 750 /var/named/master  
     nano /var/named/master/au.team.irpo  
-    ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/auteamzone.png)  
+    ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/au-team.irpo.png)  
     nano /var/named/master/0.168.192.zone    
     ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/0.168.192.zone.jpg) 
-    systemctl restart named  
+    systemctl enable --now named  
     Проверить зоны можно командой named-checkconf -z  
     ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/checkconf.png)  
     nano /etc/nsswitch.conf   
     Приведенная выше запись определяет порядок разрешения любого доменного имени.  
     Сначала система проверит отображение домена в файлах (/etc/hosts), если будет найдена соответствующая запись, она будет использовать ее.  
      Для полной работоспособности на HQ-CLI нужно установить в качестве dns севрера HQ-SRV:  
-     resolvctl dns ens3 192.168.0.2  
+     В nmtui прописывет dns 192.168.0.2  
      Для полной работоспособности на HQ-RTR нужно установить в качестве dns севрера HQ-SRV:  
      Удаляем ns-ы, если есть командой no ip name-server 8.8.8.8  
      ip name-server 192.168.0.2  
