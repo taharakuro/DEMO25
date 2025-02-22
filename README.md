@@ -26,21 +26,21 @@
  | Имя Устройства   | IPv4                     |  Интерфейс  | NIC       | Шлюз         | 
  | ---------        | ---------                | ---------   | --------- | ---------    |
  | ISP              | NAT (inet)               | ens3        | Internet  |              |
- |                  | 172.16.4.14/28           | ens4        | ISP_HQ    |              |
- |                  | 172.16.5.14/28           | ens5        | ISP_BR    |              |
- | HQ-RTR           | 172.16.4.1/28            | te0         | ISP_HQ    | 172.16.4.14  |
- |                  | 192.168.0.81/29          | te1         | HQ_NET    |              |
- |                  | 192.168.0.62/26          | te1.100     |           |              |
- |                  | 192.168.1.78/28          | te1.200     |           |              |
- |                  | 172.16.0.1/30            | GRE         | TUN       |              |
+ |                  | 172.16.4.1/28            | ens4        | ISP_HQ    |              |
+ |                  | 172.16.5.1/28            | ens5        | ISP_BR    |              |
+ | HQ-RTR           | 172.16.4.2/28            | te0         | ISP_HQ    | 172.16.4.1   |
+ |                  | 192.168.0.1/26           | te1.100     |           |              |
+ |                  | 192.168.0.65/28          | te1.200     |           |              |
+ |                  | 192.168.0.81/29          | te1.999     | HQ_NET    |              |
+ |                  | 10.0.0.1/30              | GRE         | TUN       |              |
  | HQ-SW            | 192.168.0.82/29          | ens3        | HQ_NET    |              |
  |                  | -                        | ens4        | SRV_NET   |              |
  |                  | -                        | ens5        | CLI_NET   |              |
- | HQ-SRV           | 192.168.0.2/26           | ens3        | SRV_NET   | 192.168.0.62 |
- | HQ-CLI           | 192.168.1.65/28(DHCP)    | ens3        | CLI_NET   | 192.168.1.78 |
- | BR-RTR           | 172.16.5.1/28            | te0         | ISP_BR    | 172.16.5.14  |
+ | HQ-SRV           | 192.168.0.2/26           | ens3        | SRV_NET   | 192.168.0.1  |
+ | HQ-CLI           | 192.168.1.66/28(DHCP)    | ens3        | CLI_NET   | 192.168.1.65 |
+ | BR-RTR           | 172.16.5.2/28            | te0         | ISP_BR    | 172.16.5.1   |
  |                  | 192.168.1.1/27           | te1         | BR_NET    |              |
- |                  | 172.16.0.2/30            | GRE         | TUN       |              |
+ |                  | 10.0.0.2/30              | GRE         | TUN       |              |
  | BR-SRV           | 192.168.1.2/27           | ens3        | BR_NET    | 192.168.1.1  |
 
 ## 2. Настройка ISP
@@ -48,14 +48,14 @@
     Интерфейс, подключенный к магистральному провайдеру, получает адрес по DHCP  
     o Настройте маршруты по умолчанию там, где это необходимо   
     Маршруты по умолчанию настраиваются на роутерах:  
-    HQ-RTR - ip route 0.0.0.0/0 172.16.4.14  
-    BR-RTR - ip route 0.0.0.0/0 172.16.5.14  
+    HQ-RTR - ip route 0.0.0.0/0 172.16.4.1  
+    BR-RTR - ip route 0.0.0.0/0 172.16.5.1  
     o Интерфейс, к которому подключен HQ-RTR, подключен к сети 172.16.4.0/28  
     Настройка производится на EcoRouter:  
     en  
     conf t  
     int ISP  
-    ip add 172.16.4.1/28  
+    ip add 172.16.4.2/28  
     port te0  
     service-instance toISP  
     encapsulation untagged  
@@ -63,25 +63,22 @@
     wr  mem  
     o Интерфейс, к которому подключен BR-RTR, подключен к сети 172.16.5.0/28  
     Настройка производится на EcoRouter:  
-    en  
-    conf t  
-    int ISP  
-    ip add 172.16.5.1/28  
-    port te0  
-    service-instance toISP  
-    encapsulation untagged  
-    connect ip interface ISP  
-    wr  mem  
-    o На ISP настройте динамическую сетевую трансляцию в сторону HQ-RTR и BR-RTR  
-    для доступа к сети Интернет:  
+    en
+    conf t
+    int ISP
+    ip add 172.16.5.2/28
+    port te0
+    service-instance toISP
+    encapsulation untagged
+    connect ip interface ISP
+    wr mem
+    o На ISP настройте динамическую сетевую трансляцию в сторону HQ-RTR и BR-RTR
+    для доступа к сети Интернет:
     echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
-    dnf install iptables-services –y   
-    systemctl enable ––now iptables  
-    iptables –t nat –A POSTROUTING –s 172.16.4.0/28 –o ens3 –j MASQUERADE  
-    iptables –t nat –A POSTROUTING –s 172.16.5.0/28 –o ens3 –j MASQUERADE  
-    iptables-save > /etc/sysconfig/iptables  
-    systemctl restart iptables  
-    iptables –L –t nat - должны высветится в Chain POSTROUTING две настроенные подсети.  
+    dnf install iptables-services –y
+    iptables –t nat –A POSTROUTING –o ens3 –j MASQUERADE
+    iptables-save > /etc/sysconfig/iptables
+    systemctl enable ––now iptables
 ## 3. Создание локальных учетных записей
  ### ● Создайте пользователя sshuser на серверах HQ-SRV и BR-SRV  
     useradd -m -u 1010 sshuser  
@@ -90,7 +87,6 @@
     o Идентификатор пользователя 1010  
     o Пользователь sshuser должен иметь возможность запускать sudo
     без дополнительной аутентификации.  
-    usermod -aG wheel sshuser  
     nano /etc/sudoers  
     sshuser ALL=(ALL) NOPASSWD:ALL  
    ### ● Создайте пользователя net_admin на маршрутизаторах HQ-RTR и BR-RTR  
@@ -104,15 +100,14 @@
 ## 4. Настройте на интерфейсе HQ-RTR в сторону офиса HQ виртуальный коммутатор:  
  ### ● Создайте подсеть управления с ID VLAN 999  
     Настройка на HQ-RTR:  
-    int vl999  
+    int te1.999  
     ip add 192.168.0.81/29  
     description toSW  
     port te1  
-    Service-instance toSW  
-    Encapsulation untagged  
-    ex  
-    Int vl999  
-    connect port te1 service-instance toSW  
+    service-instance toSW  
+    encapsulation dot1q 999 exact
+    rewrite pop 1
+    connect ip interface te1.999  
     Настройка на HQ-SW:  
     Перед настройкой линк ens3 в nmtui должен быть в состоянии - отключено
     Адресации так же не должно быть
@@ -121,13 +116,13 @@
     ovs-vsctl set port ens3 vlan_mode=native-untagged tag=999 trunks=999,100,200  
     ovs-vsctl add-port ovs0 ovs0-vlan999 tag=999 -- set Interface ovs0-vlan999 type=internal  
     ifconfig ovs0-vlan999 inet 192.168.0.82/29 up  
- ### ● Сервер HQ-SRV должен находиться в ID VLAN 100  
-    Настройка на HQ-RTR:  
-    int te1.100  
-    ip add 192.168.0.62/26  
-    port te1  
-    service-instance te1.100  
-    encapsulation dot1q 100  
+ ### ● Сервер HQ-SRV должен находиться в ID VLAN 100
+    Настройка на HQ-RTR:
+    int te1.100
+    ip add 192.168.0.1/26
+    port te1
+    service-instance te1.100
+    encapsulation dot1q 100 exact
     rewrite pop 1  
     connect ip interface te1.100  
     Настройка на HQ-SW:  
@@ -141,12 +136,12 @@
  ### ● Клиент HQ-CLI в ID VLAN 200  
     Настройка на HQ-RTR:  
     int te1.200  
-    ip add 192.168.1.78/28  
+    ip add 192.168.0.65/28  
     port te1  
     service-instance te1.200  
-    encapsulation dot1q 200  
+    encapsulation dot1q 200 exact
     rewrite pop 1  
-    connect ip interface te1.200  
+    connect ip interface te1.200
     Настройка на HQ-SW: 
     Перед настройкой линк ens5 в nmtui должен быть в состоянии - отключено
     Адресации так же не должно быть
@@ -179,32 +174,29 @@
   ### o Сведения о туннеле занесите в отчёт  
     Настройка на HQ-RTR:
     Interface tunnel.1  
-    Ip add 172.16.0.1/30  
-    Ip mtu 1476
+    Ip add 10.0.0.1/30  
     ip ospf network broadcast
     ip ospf mtu-ignore
-    Ip tunnel 172.16.4.1 172.16.5.1 mode gre
+    Ip tunnel 172.16.4.2 172.16.5.2 mode gre
     end
     Conf t
     Router ospf 1
-    Ospf router-id  172.16.0.1
-    network 172.16.0.0 0.0.0.3 area 0
-    network 192.168.0.0 0.0.0.63 area 0
-    network 192.168.1.0 0.0.0.15 area 0
+    Ospf router-id  10.0.0.1
+    network 10.0.0.0 0.0.0.3 area 0
+    network 192.168.0.0 0.0.0.255 area 0
     passive-interface default
     no passive-interface tunnel.1
     Настройка на BR-RTR:
     Interface tunnel.1
-    Ip add 172.16.0.2/30
-    Ip mtu 1476
+    Ip add 10.0.0.2/30
     ip ospf mtu-ignore
     ip ospf network broadcast
-    Ip tunnel 172.16.5.1 172.16.4.1 mode gre
+    Ip tunnel 172.16.5.2 172.16.4.2 mode gre
     end
     Conf t
     Router ospf 1
-    Ospf router-id 172.16.0.2
-    Network 172.16.0.0 0.0.0.3 area 0
+    Ospf router-id 10.0.0.2
+    Network 10.0.0.0 0.0.0.3 area 0
     Network 192.168.1.0 0.0.0.31 area 0
     Passive-interface default
     no passive-interface tunnel.1  
@@ -231,13 +223,11 @@
 ## 8. Настройка динамической трансляции адресов.  
  ### ● Настройте динамическую трансляцию адресов для обоих офисов.  
     Настройка производится на EcoRouter HQ-RTR: 
-    ip nat pool nat1 192.168.0.1-192.168.0.254  
-    ip nat source dynamic inside-to-outside pool nat1 overload 172.16.4.1  
-    ip nat pool nat2 192.168.1.65-192.168.1.79  
-    ip nat source dynamic inside-to-outside pool nat2 overload 172.16.4.1  
+    ip nat pool OVER 192.168.0.2-192.168.0.254  
+    ip nat source dynamic inside-to-outside pool OVER overload interface ISP 
     Настройка производится на EcoRouter BR-RTR: 
-    ip nat pool nat3 192.168.2.2-192.168.2.31  
-    ip nat source dynamic inside-to-outside pool nat3 overload 172.16.5.1 
+    ip nat pool nat3 192.168.1.2-192.168.1.31  
+    ip nat source dynamic inside-to-outside pool OVER overload interface ISP 
 ### ● Все устройства в офисах должны иметь доступ к сети Интернет  
     Настройка производится на EcoRouter HQ-RTR:
     en
@@ -245,7 +235,7 @@
     int ISP
     ip nat outside
     ex
-    int vl999
+    int te1.999
     ip nat inside
     ex
     int te1.100
@@ -263,22 +253,22 @@
     ip nat inside
     ex  
     Настройка производится на HQ-SRV:
-    В nmtui прописывеем шлюз - 192.168.0.62/26  
+    В nmtui прописывеем шлюз - 192.168.0.1/26  
     Настройка производится на BR-SRV:  
-    В nmtui прописывет шлюз - 192.168.2.1/27
+    В nmtui прописывет шлюз - 192.168.1.1/27
 ## 9. Настройка протокола динамической конфигурации хостов.  
   ● Настройте нужную подсеть  
   ### ● Для офиса HQ в качестве сервера DHCP выступает маршрутизатор HQ-RTR.  
     Настройка производится на EcoRouter HQ-RTR:
-    ip pool dhcpHQ 192.168.1.65-192.168.1.79
+    ip pool dhcpHQ 192.168.0.66-192.168.0.78
     en
     conf t
     dhcp-server 1
     pool dhcpHQ 1
     domain-name au-team.irpo
     mask 255.255.255.240  
-    gateway 192.168.1.78  
-    dns 192.168.0.1  
+    gateway 192.168.0.65  
+    dns 192.168.0.2  
     end  
     wr mem  
   ###  ● Клиентом является машина HQ-CLI.  
@@ -292,28 +282,22 @@
 ## 10. Настройка DNS для офисов HQ и BR.  
   ● Основной DNS-сервер реализован на HQ-SRV.  
     dnf install bind -y  
-    systemctl enable --now named  
-    chattr +i  
-    mv /etc/named/named.conf /etc/named/named.conf.backup  
+    systemctl enable --now named   
     nano /etc/named.conf  
     ![named первая часть](https://github.com/dizzamer/DEMO2025/blob/main/dns.png)  
     ![named вторая часть](https://github.com/dizzamer/DEMO2025/blob/main/dns2.png)  
     mkdir /var/named/master  
-    chown -R named:named /var/named/master  
-    touch /var/named/master/au.team  
-    chmod 750 /var/named/*  
-    chmod 750 /var/named/master/*  
-    nano /var/named/master/au.team  
+    chown -R root:named /var/named/master  
+    touch /var/named/master/au.team    
+    chmod -R 750 /var/named/master  
+    nano /var/named/master/au.team.irpo  
     ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/auteamzone.png)  
     nano /var/named/master/0.168.192.zone    
     ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/0.168.192.zone.jpg) 
     systemctl restart named  
     Проверить зоны можно командой named-checkconf -z  
     ![au team irpo зона](https://github.com/dizzamer/DEMO2025/blob/main/checkconf.png)  
-    nano /etc/nsswitch.conf  
-    /etc/nsswitch.conf – это файл конфигурации Linux, который определяет, как система должна переключаться между различными поставщиками услуг имен.  
-    Меняем hosts: files myhostname resolve [!UNAVAIL=return] dns на:    
-    ![nsswitch](https://github.com/dizzamer/DEMO2025/blob/main/nsswitch.jpg)   
+    nano /etc/nsswitch.conf   
     Приведенная выше запись определяет порядок разрешения любого доменного имени.  
     Сначала система проверит отображение домена в файлах (/etc/hosts), если будет найдена соответствующая запись, она будет использовать ее.  
      Для полной работоспособности на HQ-CLI нужно установить в качестве dns севрера HQ-SRV:  
