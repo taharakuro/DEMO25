@@ -239,11 +239,6 @@
     setenforce 0
     ```
     *(Также изменить в файле `/etc/selinux/config`)*
-  - Установка OpenSSH:
-    ```bash
-    dnf install openssh -y
-    systemctl enable --now sshd
-    ```
   - Изменение порта в `/etc/ssh/sshd_config`:
     ```
     Port 2024
@@ -444,6 +439,9 @@
     br-srv  IN      A       192.168.1.2
     moodle  IN      CNAME   hq-rtr
     wiki    IN      CNAME   hq-rtr
+    _ldap._tcp   IN   SRV   0   100   389   br-srv.au-team.irpo.
+    _kerberos   IN   SRV   0 100 88   br-srv.au-team.irpo.
+    _kerberos   IN   TXT   "AU-TEAM-IRPO"
     ```
   - Пример файла зоны `0.168.192.zone`:
     ```zone
