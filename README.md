@@ -510,84 +510,7 @@
 
 - Установка необходимых пакетов:
   ```bash
-  dnf install samba* krb5* bind -y
-  ```
-- Резервное копирование конфигурационных файлов:
-  ```bash
-  mv /etc/samba/smb.conf /etc/samba/smb.conf.back
-  cp /etc/krb5.conf /etc/krb5.conf.back
-  ```
-
-- **Проверка прав на `/etc/krb5.conf`:**
-  ```bash
-  ls -l /etc/krb5.conf
-  chown root:named /etc/krb5.conf  # при необходимости
-  ```
-
-- **Настройка имени хоста:**
-  ```bash
-  hostnamectl set-hostname hq-srv.au-team.irpo; exec bash
-  ```
-
-- **Отключение systemd-resolved:**  
-  Отредактируйте `/etc/systemd/resolved.conf`, установив:
-  ```
-  DNSStubListener=no
-  ```
-  Затем:
-  ```bash
-  systemctl restart systemd-resolved.service NetworkManager
-  cat /etc/resolv.conf
-  ```
-
-- **Настройка интерфейса через nmtui:**  
-  Укажите DNS: `192.168.1.2` и домен поиска: `hq-srv.au-team.irpo`.
-
-#### Создание домена с помощью Samba DC
-
-- Резервное копирование файлов:
-  ```bash
-  cp /etc/samba/smb.conf /etc/samba/smb.conf.back
-  cp /etc/krb5.conf /etc/krb5.conf.back
-  ```
-- **Настройка Kerberos:**  
-  Отредактируйте `/etc/krb5.conf`:
-  - В секции `[libdefaults]`:
-    ```
-    default_realm = au-team.irpo
-    ```
-  - Добавьте в секции `[realms]` и `[domain_realm]`:
-    ```ini
-    [realms]
-    AU-TEAM.IRPO = {
-      kdc = br-srv.au-team.irpo
-      admin_server = br-srv.au-team.irpo
-    }
-    [domain_realm]
-      .au-team.irpo = AU-TEAM.IRPO
-      au-team.irpo = AU-TEAM.IRPO
-    ```
-
-- **Настройка файла crypto-policies:**  
-  Файл `/etc/krb5.conf.d/crypto-policies` должен содержать:
-  ```ini
-  [libdefaults]
-   default_tgs_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 RC4-HMAC DES-CBC-CRC DES3-CBC-SHA1 DES-CBC-MD5
-   default_tkt_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 RC4-HMAC DES-CBC-CRC DES3-CBC-SHA1 DES-CBC-MD5
-   preferred_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 RC4-HMAC DES-CBC-CRC DES3-CBC-SHA1 DES-CBC-MD5
-  ```
-
-#### Настройка DNS-сервера BIND
-
-- Редактирование `/etc/named.conf`:
-  ```ini
-  listen-on port 53 { 192.168.1.2; };
-  allow-query { any; };
-  dnssec-validation no;
-  tkey-gssapi-keytab "/var/lib/samba/bind-dns/dns.keytab";
-  minimal-responses yes;
-  forwarders { 8.8.8.8; };
-  ```
+  dnf install samba* krb5* -y
 
 #### Создание домена через `samba-tool`
 
@@ -603,8 +526,8 @@
 
 - **Запуск служб:**
   ```bash
-  systemctl enable samba named --now
-  systemctl status samba named
+  systemctl enable samba --now
+  systemctl status samba
   ```
 
 #### Управление пользователями и группами
