@@ -440,7 +440,7 @@
     wiki    IN      CNAME   hq-rtr
     _ldap._tcp   IN   SRV   0   100   389   br-srv.au-team.irpo.
     _kerberos   IN   SRV   0 100 88   br-srv.au-team.irpo.
-    _kerberos   IN   TXT   "AU-TEAM-IRPO"
+    _kerberos   IN   TXT   "AU-TEAM.IRPO"
     ```
   - Пример файла зоны `0.168.192.zone`:
     ```zone
