@@ -672,16 +672,15 @@
 
 - **На BR-RTR (для сервиса wiki):**
   ```bash
-  ip nat source static tcp 192.168.1.2 80 192.168.1.65 8080
-  ip nat source static tcp 172.16.5.1 80 192.168.1.2 8080
+  ip nat destination static tcp 192.168.1.2 80 192.168.1.2 8080
   ```
 - **На HQ-RTR (для сервиса SSH на HQ-SRV):**
   ```bash
-  ip nat source static tcp 192.168.0.2 2024 192.168.1.65 2024
+  ip nat destination static tcp 192.168.0.2 2024 192.168.0.2 2024
   ```
 - **На BR-RTR (для сервиса SSH на BR-SRV):**
   ```bash
-  ip nat source static tcp 192.168.1.2 2024 192.168.1.65 2024
+  ip nat destination static tcp 192.168.1.2 2024 192.168.1.2 2024
   ```
 
 ---
