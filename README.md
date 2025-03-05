@@ -600,15 +600,18 @@
   ```yaml
   [router] 
   hq-rtr 
-  br-rtr 
+  br-rtr
+  
   [linux] 
   hq-sru 
-  hq-cli 
+  hq-cli
+  
   [router:vars] 
   ansible_connection=ansible.netcommon.network_cli 
   ansible_network_os=community.network.routeros 
   ansible_user=net_admin 
-  ansible_password=P@ssword 
+  ansible_password=P@ssword
+  
   [linux:vars] 
   ansible_user=sshuser 
   ansible_password=P@ssword
