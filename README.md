@@ -424,14 +424,13 @@
     ```zone
     $TTL    1D
     @       IN      SOA     au-team.irpo. root.au-team.irpo. (
-                              2024102200 ; serial
-                              12H        ; refresh
+                              0          ; serial
+                              1D         ; refresh
                               1H         ; retry
                               1W         ; expire
-                              1H         ; ncache
-                            )
-            IN      NS      au-team.irpo.
-            IN      A       192.168.0.2
+                              3H )       ; minimum
+            IN      NS      @
+            IN      A       127.0.0.1
     hq-rtr  IN      A       192.168.0.1
     br-rtr  IN      A       192.168.1.1
     hq-srv  IN      A       192.168.0.2
@@ -447,13 +446,12 @@
     ```zone
     $TTL    1D
     @       IN      SOA     au-team.irpo. root.au-team.irpo. (
-                              2024102200 ; serial
-                              12H        ; refresh
+                              0          ; serial
+                              1D         ; refresh
                               1H         ; retry
                               1W         ; expire
-                              1H         ; ncache
-                            )
-            IN      NS      au-team.irpo.
+                              3H )       ; minimum
+            IN      NS      @
     1       IN      PTR     hq-rtr.au-team.irpo.
     2       IN      PTR     hq-srv.au-team.irpo.
     66      IN      PTR     hq-cli.au-team.irpo.
