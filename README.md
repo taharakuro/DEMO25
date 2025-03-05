@@ -596,7 +596,7 @@
   ```bash
   dnf install ansible -y
   ```
-- **Файл инвентаря (`/etc/ansible/inventory.yml`):**
+- **Файл инвентаря (`/etc/ansible/hosts`):**
   ```yaml
   [router] 
   hq-rtr 
@@ -616,15 +616,6 @@
   ansible_user=sshuser 
   ansible_password=P@ssword
   ```
-- **Настройка SSH-ключей:**
-  - Генерация ключа:
-    ```bash
-    ssh-keygen -C "$(whoami)@$(hostname)-$(date -I)"
-    ```
-  - Распространение ключа:
-    ```bash
-    ssh-copy-id root@<server_ip>
-    ```
 - **Проверка соединения:**
   ```bash
   ansible test -m ping
